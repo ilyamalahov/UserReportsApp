@@ -1,0 +1,24 @@
+﻿@inherits LayoutComponentBase
+
+<Layout>
+    <LayoutHeader>
+        <Bar Breakpoint="Breakpoint.Desktop"
+             Background="Background.Light"
+             ThemeContrast="ThemeContrast.Light">
+            <BarBrand>
+                <BarLink To="/">User reports app</BarLink>
+            </BarBrand>
+            <BarToggler />
+            <BarMenu>
+                <BarStart>
+                    <BarItem>
+                        <BarLink To="users">Users</BarLink>
+                    </BarItem>
+                </BarStart>
+            </BarMenu>
+        </Bar>
+    </LayoutHeader>
+    <LayoutContent>
+        @Body
+    </LayoutContent>
+</Layout>

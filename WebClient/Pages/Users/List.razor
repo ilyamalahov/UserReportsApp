@@ -1,0 +1,139 @@
+﻿@page "/users"
+
+@inject IApiHttpClient client
+
+<Div>
+    <Breadcrumb>
+        <BreadcrumbItem>
+            <BreadcrumbLink To="/">Home</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem Active="true">
+            <BreadcrumbLink To="/users">Users</BreadcrumbLink>
+        </BreadcrumbItem>
+    </Breadcrumb>
+</Div>
+
+<Div>
+    <Heading Size="HeadingSize.Is4">Пользователи</Heading>
+    <Button Clicked="_ => usersDataGrid.New()" Color="Color.Primary"><Icon Name="IconName.Add" />Добавить</Button>
+</Div>
+
+<Div>
+    <DataGrid Data="model.Items"
+              TotalItems="model.Count"
+              TItem="User"
+              ReadData="OnReadData"
+              ShowPager="true"
+              Editable="true"
+              EditMode="DataGridEditMode.Popup"
+              RowRemoving="OnRowRemoving"
+              RowUpdating="OnRowUpdating"
+              RowInserting="OnRowInserting"
+              RowSelectable="_ => false"
+              Hoverable="false"
+              Responsive="true"
+              @ref="usersDataGrid">
+        <DataGridColumns>
+            <DataGridColumn TItem="User" Field="Id" Caption="Id" Width="100px"></DataGridColumn>
+            <DataGridColumn TItem="User" Field="Email" Caption="Email" Editable="true">
+                <DisplayTemplate>
+                    <Blazorise.Link To="@GetUserDetailsLink(context)">@context.Email</Blazorise.Link>
+                </DisplayTemplate>
+                <EditTemplate>
+                    <TextEdit Placeholder="Электронная почта"
+                              Size="Size.Small"
+                              Text="@((string)context.CellValue)"
+                              TextChanged="value => context.CellValue = value" />
+                </EditTemplate>
+            </DataGridColumn>
+            <DataGridColumn TItem="User" Field="FirstName" Caption="First name" Editable="true">
+                <EditTemplate>
+                    <TextEdit Placeholder="Имя"
+                              Size="Size.Small"
+                              Text="@((string)context.CellValue)"
+                              TextChanged="value => context.CellValue = value" />
+                </EditTemplate>
+            </DataGridColumn>
+            <DataGridColumn TItem="User" Field="LastName" Caption="Last name" Editable="true">
+                <EditTemplate>
+                    <TextEdit Placeholder="Фамилия"
+                              Size="Size.Small"
+                              Text="@((string)context.CellValue)"
+                              TextChanged="value => context.CellValue = value" />
+                </EditTemplate>
+            </DataGridColumn>
+            <DataGridColumn TItem="User" Field="MiddleName" Caption="Middle name" Editable="true">
+                <EditTemplate>
+                    <TextEdit Placeholder="Отчество"
+                              Size="Size.Small"
+                              Text="@((string)context.CellValue)"
+                              TextChanged="value => context.CellValue = value" />
+                </EditTemplate>
+            </DataGridColumn>
+            <DataGridCommandColumn TItem="User" NewCommandAllowed="false" Width="100px">
+                <EditCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked" Margin="Margin.Is0.FromRight"><Icon Name="IconName.Edit" /></Button>
+                </EditCommandTemplate>
+                <DeleteCommandTemplate>
+                    <Button Color="Color.Dark" Clicked="@context.Clicked"><Icon Name="IconName.Delete" /></Button>
+                </DeleteCommandTemplate>
+                <SaveCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">Сохранить</Button>
+                </SaveCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button Color="Color.Secondary" Clicked="@context.Clicked">Отмена</Button>
+                </CancelCommandTemplate>
+            </DataGridCommandColumn>
+        </DataGridColumns>
+        <EmptyTemplate>
+            <Text Alignment="TextAlignment.Center">Нет данных</Text>
+        </EmptyTemplate>
+        <LoadingTemplate>
+            <SpinKit Type="SpinKitType.Pulse" Centered="true" />
+        </LoadingTemplate>
+    </DataGrid>
+</Div>
+
+@code
+{
+    private PagingModel<User> model = new PagingModel<User>();
+
+    private DataGrid<User> usersDataGrid;
+
+    private async Task OnReadData(DataGridReadDataEventArgs<User> e)
+    {
+        model = await client.GetUsersAsync(e.Page, e.PageSize);
+
+        StateHasChanged();
+    }
+
+    private async Task OnRowInserting(CancellableRowChange<User, Dictionary<string, object>> context)
+    {
+        var user = context.Item.Clone().FillObjectProperty(context.Values);
+
+        var inserted = await client.InsertUserAsync(user);
+
+        context.Cancel = !inserted;
+    }
+
+    private async Task OnRowUpdating(CancellableRowChange<User, Dictionary<string, object>> context)
+    {
+        var user = context.Item.Clone().FillObjectProperty(context.Values);
+
+        var updated = await client.UpdateUserAsync(user);
+
+        context.Cancel = !updated;
+    }
+
+    private async Task OnRowRemoving(CancellableRowChange<User> context)
+    {
+        var deleted = await client.RemoveUserAsync(context.Item);
+
+        context.Cancel = !deleted;
+    }
+
+    private string GetUserDetailsLink(User user)
+    {
+        return string.Format("users/{0}", user.Id);
+    }
+}

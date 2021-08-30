@@ -1,0 +1,21 @@
+﻿<div class="@NavMenuCssClass" @onclick="ToggleNavMenu" style="display: flex; flex-direction: row;">
+    <ul class="ura-menu">
+        <li class="ura-menu-item">
+            <NavLink class="ura-menu-link" href="users">Users</NavLink>
+        </li>
+    </ul>
+    <button class="ura-menu-toggler" @onclick="ToggleNavMenu">
+        <span class="ura-toggler-icon"></span>
+    </button>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

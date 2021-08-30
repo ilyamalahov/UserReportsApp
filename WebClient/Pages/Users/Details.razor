@@ -1,0 +1,127 @@
+﻿@page "/users/{Id:int}"
+
+@inject IApiHttpClient apiHttpClient
+@inject INotificationService notificationService
+
+<Div>
+    <Breadcrumb>
+        <BreadcrumbItem>
+            <BreadcrumbLink To="/">Home</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem>
+            <BreadcrumbLink To="/users">Users</BreadcrumbLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem Active="true">
+            <BreadcrumbLink To="/users/{id}">User</BreadcrumbLink>
+        </BreadcrumbItem>
+    </Breadcrumb>
+</Div>
+
+<Div>
+    <Heading Size="HeadingSize.Is4">Информация о пользователе</Heading>
+    @if (user != null)
+    {
+        <Heading Size="HeadingSize.Is5">@user.FullName (@user.Email)</Heading>
+    }
+    else
+    {
+        <Heading Size="HeadingSize.Is5">Нет пользователя</Heading>
+    }
+</Div>
+
+<Div>
+    <Heading Size="HeadingSize.Is6">Отчеты</Heading>
+    <Button Clicked="_ => reportsDataGrid.New()">Create</Button>
+
+    <DataGrid @ref="reportsDataGrid"
+              TItem="Report"
+              Data="model.Items"
+              TotalItems="model.Count"
+              ReadData="OnReadData"
+              NewItemDefaultSetter="SetReportValues"
+              Editable="true"
+              EditMode="DataGridEditMode.Popup"
+              RowInserting="OnRowInserting"
+              RowUpdating="OnRowUpdating"
+              RowRemoving="OnRowRemoving">
+        <DataGridColumns>
+            <DataGridColumn TItem="Report" Field="Id" Caption="Идентификатор"></DataGridColumn>
+            <DataGridColumn TItem="Report" Field="CreatedDate" Caption="Дата добавления"></DataGridColumn>
+            <DataGridColumn TItem="Report" Field="NumberOfHours" Caption="Количество часов" Editable="true"></DataGridColumn>
+            <DataGridColumn TItem="Report" Field="Remark" Caption="Примечание" Editable="true"></DataGridColumn>
+            <DataGridCommandColumn TItem="Report" NewCommandAllowed="false">
+                <DeleteCommandTemplate>
+                    <Button Clicked="context.Clicked"><Icon Name="IconName.Delete" Margin="Margin.Is4.FromRight" /></Button>
+                </DeleteCommandTemplate>
+                <EditCommandTemplate>
+                    <Button Clicked="context.Clicked"><Icon Name="IconName.Edit" /></Button>
+                </EditCommandTemplate>
+            </DataGridCommandColumn>
+        </DataGridColumns>
+        <EmptyTemplate>
+            <Text Alignment="TextAlignment.Center" TextAlignment="TextAlignment.Center">Нет данных</Text>
+        </EmptyTemplate>
+        <LoadingTemplate>
+            <SpinKit Type="SpinKitType.Pulse" Centered="true" />
+        </LoadingTemplate>
+    </DataGrid>
+</Div>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private User user;
+
+    private PagingModel<Report> model = new PagingModel<Report>();
+
+    private DataGrid<Report> reportsDataGrid;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await apiHttpClient.GetUserByIdAsync(Id);
+    }
+
+    private async Task OnReadData(DataGridReadDataEventArgs<Report> e)
+    {
+        model = await apiHttpClient.GetUserReportsAsync(Id);
+
+        StateHasChanged();
+    }
+
+    private async Task OnRowInserting(CancellableRowChange<Report, Dictionary<string, object>> context)
+    {
+        var report = context.Item.Clone().FillObjectProperty(context.Values);
+
+        var insertResult = await apiHttpClient.InsertReportAsync(report);
+
+        if (!insertResult.Success)
+        {
+            context.Cancel = true;
+
+            await notificationService.Error(insertResult.ErrorMessage);
+        }
+    }
+
+    private async Task OnRowUpdating(CancellableRowChange<Report, Dictionary<string, object>> context)
+    {
+        var report = context.Item.Clone().FillObjectProperty(context.Values);
+
+        var updated = await apiHttpClient.UpdateReportAsync(report);
+
+        context.Cancel = !updated;
+    }
+
+    private async Task OnRowRemoving(CancellableRowChange<Report> context)
+    {
+        var deleted = await apiHttpClient.RemoveReportAsync(context.Item);
+
+        context.Cancel = !deleted;
+    }
+
+    private void SetReportValues(Report report)
+    {
+        report.UserId = Id;
+        report.CreatedDate = DateTime.Now;
+    }
+}
