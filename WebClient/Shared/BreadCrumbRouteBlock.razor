@@ -1,0 +1,13 @@
+﻿@if (CurrentRoute != null)
+{
+    <Div>
+        <Breadcrumb Background="Background.Light" Padding="Padding.Is3.OnX.Is2.OnY" Style="line-height: 1.5rem">
+            @foreach (var route in CurrentRoute.Items)
+            {
+                <BreadcrumbItem Active="route.Active">
+                    <BreadcrumbLink To="@route.Link">@route.Name</BreadcrumbLink>
+                </BreadcrumbItem>
+            }
+        </Breadcrumb>
+    </Div>
+}

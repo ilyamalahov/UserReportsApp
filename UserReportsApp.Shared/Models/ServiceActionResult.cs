@@ -11,7 +11,7 @@ namespace UserReportsApp.Shared.Models
         public string ErrorMessage => null;
     }
 
-    public class ErrorResult:IServiceActionResult
+    public class ErrorResult : IServiceActionResult
     {
         public ErrorResult(string errorMessage)
         {
@@ -22,7 +22,7 @@ namespace UserReportsApp.Shared.Models
         public string ErrorMessage { get; }
     }
 
-    public class SuccessObjectResult<TObject>: SuccessResult, IServiceActionResult<TObject>
+    public class SuccessObjectResult<TObject> : SuccessResult, IServiceActionResult<TObject>
     {
         public SuccessObjectResult(TObject obj)
         {
@@ -32,7 +32,7 @@ namespace UserReportsApp.Shared.Models
         public TObject Object { get; }
     }
 
-    public interface IServiceActionResult<TObject>: IServiceActionResult
+    public interface IServiceActionResult<TObject> : IServiceActionResult
     {
         public TObject Object { get; }
     }

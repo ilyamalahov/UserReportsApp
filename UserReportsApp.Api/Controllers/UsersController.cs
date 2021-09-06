@@ -1,9 +1,7 @@
-﻿using System.Linq;
+﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using UserReportsApp.Api.Data;
 using UserReportsApp.Api.Entities;
 using UserReportsApp.Api.Services;
 using UserReportsApp.Shared.Models;
@@ -16,72 +14,47 @@ namespace UserReportsApp.Api
     public class UsersController : ControllerBase
     {
         private readonly IUserReportsService _userReportsService;
-        private readonly UserReportsContext _context;
 
         public UsersController(
-            IUserReportsService userReportsService,
-            UserReportsContext context)
+            IUserReportsService userReportsService)
         {
             _userReportsService = userReportsService;
-            _context = context;
         }
 
         [HttpGet]
-        public async Task<PagingModel<User>> GetUsersAsync([FromQuery] int page, [FromQuery] int pageSize)
+        public async Task<PagingModel<UserListItemDto>> GetUsersAsync([FromQuery] int page, [FromQuery] int pageSize)
         {
-            var offset = (page - 1) * pageSize;
-
-            var users = _context.Users;
-
-            return new PagingModel<User>
-            {
-                Items = await users.Skip(offset).Take(pageSize).OrderBy(u => u.Id).ToListAsync(),
-                Count = await users.CountAsync()
-            };
+            return await _userReportsService.GetUsersAsync(page, pageSize);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public async Task<User> GetUserByIdAsync(int id)
         {
-            return await _context.Users.FindAsync(id);
+            return await _userReportsService.GetUserByIdAsync(id);
         }
 
         [HttpPost]
-        public async Task<ActionResult<User>> CreateUserAsync(User user)
+        public async Task<ActionResult> CreateUserAsync([FromBody] UserListItemDto userListItemDto)
         {
-            await _context.Users.AddAsync(user);
+            await _userReportsService.CreateUserAsync(userListItemDto);
 
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("CreateUser", user);
+            return CreatedAtAction("CreateUser", userListItemDto);
         }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult> UpdateUserAsync(int id, User user)
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> UpdateUserAsync(int id, [FromBody] UserListItemDto userListItemDto)
         {
-            _context.Users.Update(user);
-
-            await _context.SaveChangesAsync();
+            await _userReportsService.UpdateUserAsync(id, userListItemDto);
 
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<ActionResult> DeleteUserAsync(int id)
         {
-            var user = new User { Id = id };
-
-            _context.Users.Remove(user);
-
-            await _context.SaveChangesAsync();
+            await _userReportsService.DeleteUserAsync(id);
 
             return NoContent();
-        }
-
-        [HttpGet("{id}/reports")]
-        public async Task<PagingModel<ReportDto>> GetUserReportsAsync(int id)
-        {
-            return await _userReportsService.GetUserReportsAsync(userId: id);
         }
     }
 }

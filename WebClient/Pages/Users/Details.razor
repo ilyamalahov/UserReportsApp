@@ -3,21 +3,7 @@
 @inject IApiHttpClient apiHttpClient
 @inject INotificationService notificationService
 
-<Div>
-    <Breadcrumb>
-        <BreadcrumbItem>
-            <BreadcrumbLink To="/">Home</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbItem>
-            <BreadcrumbLink To="/users">Users</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbItem Active="true">
-            <BreadcrumbLink To="/users/{id}">User</BreadcrumbLink>
-        </BreadcrumbItem>
-    </Breadcrumb>
-</Div>
-
-<Div>
+<Div Padding="Padding.Is3.OnX" Margin="Margin.Is4.FromBottom">
     <Heading Size="HeadingSize.Is4">Информация о пользователе</Heading>
     @if (user != null)
     {
@@ -29,14 +15,24 @@
     }
 </Div>
 
-<Div>
-    <Heading Size="HeadingSize.Is6">Отчеты</Heading>
-    <Button Clicked="_ => reportsDataGrid.New()">Create</Button>
+<Div Padding="Padding.Is3.OnX">
+    <Div Flex="Flex.Row.AlignItems.Center">
+        <Heading Flex="Flex.Shrink.Is1.Grow.Is1" 
+                 Size="HeadingSize.Is5" 
+                 Margin="Margin.Is0" 
+                 Style="font-weight: 500;">Отчеты</Heading>
+
+        <Button Color="Color.Primary" Clicked="_ => reportsDataGrid.New()">
+            <Icon Name="IconName.Add" Style="margin-right: 0.25rem" />
+            <Span>Добавить</Span>
+        </Button>
+    </Div>
 
     <DataGrid @ref="reportsDataGrid"
               TItem="Report"
               Data="model.Items"
               TotalItems="model.Count"
+              ShowPager="true"
               ReadData="OnReadData"
               NewItemDefaultSetter="SetReportValues"
               Editable="true"
@@ -45,17 +41,27 @@
               RowUpdating="OnRowUpdating"
               RowRemoving="OnRowRemoving">
         <DataGridColumns>
-            <DataGridColumn TItem="Report" Field="Id" Caption="Идентификатор"></DataGridColumn>
-            <DataGridColumn TItem="Report" Field="CreatedDate" Caption="Дата добавления"></DataGridColumn>
-            <DataGridColumn TItem="Report" Field="NumberOfHours" Caption="Количество часов" Editable="true"></DataGridColumn>
+            <DataGridColumn TItem="Report" Field="Id" Caption="Идентификатор" Width="150px"></DataGridColumn>
+            <DataGridColumn TItem="Report" Field="CreatedDate" Caption="Дата добавления" Width="150px"></DataGridColumn>
+            <DataGridColumn TItem="Report" Field="NumberOfHours" Caption="Количество часов" Editable="true" Width="150px"></DataGridColumn>
             <DataGridColumn TItem="Report" Field="Remark" Caption="Примечание" Editable="true"></DataGridColumn>
-            <DataGridCommandColumn TItem="Report" NewCommandAllowed="false">
-                <DeleteCommandTemplate>
-                    <Button Clicked="context.Clicked"><Icon Name="IconName.Delete" Margin="Margin.Is4.FromRight" /></Button>
-                </DeleteCommandTemplate>
+            <DataGridCommandColumn TItem="Report" NewCommandAllowed="false" Width="110px">
                 <EditCommandTemplate>
-                    <Button Clicked="context.Clicked"><Icon Name="IconName.Edit" /></Button>
+                    <Button Color="Color.Primary" Outline="true" Clicked="context.Clicked" Style="margin-right: 0.25rem;">
+                        <Icon Name="IconName.Edit" />
+                    </Button>
                 </EditCommandTemplate>
+                <DeleteCommandTemplate>
+                    <Button Color="Color.Danger" Outline="true" Clicked="context.Clicked">
+                        <Icon Name="IconName.Delete" />
+                    </Button>
+                </DeleteCommandTemplate>
+                <SaveCommandTemplate>
+                    <Button Color="Color.Primary" Clicked="@context.Clicked">Сохранить</Button>
+                </SaveCommandTemplate>
+                <CancelCommandTemplate>
+                    <Button Color="Color.Secondary" Clicked="@context.Clicked">Отмена</Button>
+                </CancelCommandTemplate>
             </DataGridCommandColumn>
         </DataGridColumns>
         <EmptyTemplate>
@@ -64,6 +70,9 @@
         <LoadingTemplate>
             <SpinKit Type="SpinKitType.Pulse" Centered="true" />
         </LoadingTemplate>
+        <PopupTitleTemplate Context="context">
+            @GetPopupTitle(context.EditState, context.Item)
+        </PopupTitleTemplate>
     </DataGrid>
 </Div>
 
@@ -82,9 +91,29 @@
         user = await apiHttpClient.GetUserByIdAsync(Id);
     }
 
+    private string GetPopupTitle(DataGridEditState editState, Report report)
+    {
+        if (editState == DataGridEditState.New)
+        {
+            return "Добавление отчета";
+        }
+
+        if (editState == DataGridEditState.Edit)
+        {
+            return string.Format("Редактирование отчета #{0}", report.Id);
+        }
+
+        if (editState == DataGridEditState.None)
+        {
+            return string.Format("Отчет #{0}", report.Id);
+        }
+
+        throw new NotSupportedException("Недопустимое состояние");
+    }
+
     private async Task OnReadData(DataGridReadDataEventArgs<Report> e)
     {
-        model = await apiHttpClient.GetUserReportsAsync(Id);
+        model = await apiHttpClient.GetUserReportsAsync(Id, e.Page, e.PageSize);
 
         StateHasChanged();
     }

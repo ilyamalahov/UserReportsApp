@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace UserReportsApp.Shared.Models
 {
-    public class ReportDto
+    public class ReportListItemDto
     {
         public int Id { get; set; }
         public DateTime CreatedDate { get; set; }

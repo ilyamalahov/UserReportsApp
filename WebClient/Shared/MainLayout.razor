@@ -1,24 +1,58 @@
 ﻿@inherits LayoutComponentBase
 
+@inject NavigationManager navigationManager
+
 <Layout>
-    <LayoutHeader>
+    <LayoutHeader Fixed="true" Border="Border.Is1.OnBottom">
         <Bar Breakpoint="Breakpoint.Desktop"
              Background="Background.Light"
-             ThemeContrast="ThemeContrast.Light">
+             ThemeContrast="ThemeContrast.Light" 
+             Padding="Padding.Is0.OnY">
             <BarBrand>
-                <BarLink To="/">User reports app</BarLink>
+                <BarLink TextColor="TextColor.Primary" To="/" Flex="Flex.Row.AlignItems.Center" Padding="Padding.Is0.OnY">
+                    <Image Source="/images/logo.png" Style="height: 48px;"></Image>
+                    <Span>User reports</Span>
+                </BarLink>
             </BarBrand>
-            <BarToggler />
-            <BarMenu>
-                <BarStart>
-                    <BarItem>
-                        <BarLink To="users">Users</BarLink>
-                    </BarItem>
-                </BarStart>
-            </BarMenu>
         </Bar>
     </LayoutHeader>
-    <LayoutContent>
-        @Body
-    </LayoutContent>
+    <Layout Sider="true">
+        <LayoutSider>
+            <Bar Mode="BarMode.VerticalInline"
+                 Shadow="Shadow.Remove"
+                 Background="Background.Light"
+                 Style="border-right: 1px solid #dee2e6;">
+                <BarMenu Shadow="Shadow.None">
+                    <BarStart>
+                        <BarItem>
+                            <BarLink To="/users" Title="Пользователи">
+                                <Icon Name="IconName.User" Margin="Margin.Is3.FromRight" />
+                                <Span>Пользователи</Span>
+                            </BarLink>
+                        </BarItem>
+                    </BarStart>
+                </BarMenu>
+            </Bar>
+        </LayoutSider>
+        <LayoutContent>
+            <BreadCrumbRouteBlock @ref="breadCrumbsBlock"/>
+            <Div>
+                @Body
+            </Div>
+        </LayoutContent>
+    </Layout>
 </Layout>
+
+@code
+{
+    private BreadCrumbRouteBlock breadCrumbsBlock;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+
+        var requestUri = new Uri(navigationManager.Uri);
+
+        breadCrumbsBlock.SetCurrentRoute(requestUri.AbsolutePath);
+    }
+}

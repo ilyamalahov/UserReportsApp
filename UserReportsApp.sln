@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserReportsApp.Api", "UserR
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebClient", "WebClient\WebClient.csproj", "{295BF9AB-99FA-43DE-8C4C-EA9F3FFF103A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserReportsApp.Shared", "UserReportsApp.Shared\UserReportsApp.Shared.csproj", "{504B42B5-F480-4F1B-A981-56A749B691B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserReportsApp.Shared", "UserReportsApp.Shared\UserReportsApp.Shared.csproj", "{504B42B5-F480-4F1B-A981-56A749B691B6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Api", "Api", "{78653928-834A-4C8F-B044-0D086387F62E}"
 EndProject

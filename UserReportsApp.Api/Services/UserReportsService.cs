@@ -1,95 +1,135 @@
-﻿using System.Linq;
+﻿using System;
 using System.Threading.Tasks;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using Microsoft.EntityFrameworkCore;
-using UserReportsApp.Api.Data;
 using UserReportsApp.Api.Entities;
+using UserReportsApp.Api.Repositories;
 using UserReportsApp.Shared.Models;
 
 namespace UserReportsApp.Api.Services
 {
-    public class UserReportsService : IUserReportsService
+    public class UserReportsService : ServiceBase, IUserReportsService
     {
-        private readonly UserReportsContext _context;
         private readonly IMapper _mapper;
+        private readonly IReportsRepository _reportsRepository;
+        private readonly IUsersRepository _usersRepository;
 
         public UserReportsService(
-            UserReportsContext context,
-            IMapper mapper)
+            IMapper mapper,
+            IReportsRepository reportsRepository,
+            IUsersRepository usersRepository)
         {
-            _context = context;
             _mapper = mapper;
+            _reportsRepository = reportsRepository;
+            _usersRepository = usersRepository;
         }
 
-        public async Task<IServiceActionResult<ReportDto>> CreateReportAsync(ReportDto reportDto)
+        #region Reports
+
+        public async Task<IServiceActionResult> CreateReportAsync(ReportListItemDto reportDto)
         {
             var report = _mapper.Map<Report>(reportDto);
 
-            await _context.Reports.AddAsync(report);
+            await _reportsRepository.CreateReportAsync(report);
 
-            await _context.SaveChangesAsync();
+            _mapper.Map(report, reportDto);
 
-            var addedReportDto = _mapper.Map<ReportDto>(report);
-
-            return Success(addedReportDto);
+            return Success();
         }
 
-        public async Task<IServiceActionResult> UpdateReportAsync(int id, ReportDto reportDto)
+        public async Task<IServiceActionResult> UpdateReportAsync(int id, ReportListItemDto reportDto)
         {
-            var report = await _context.Reports.FindAsync(id);
+            var report = await _reportsRepository.GetReportByIdAsync(id);
 
             if (report == null)
             {
-                return Error("Отчет не существует");
+                return Error("Отчет с идентификатором {Id} не существует", id);
             }
 
             _mapper.Map(reportDto, report);
 
-            _context.Reports.Update(report);
-
-            await _context.SaveChangesAsync();
+            await _reportsRepository.UpdateReportAsync(report);
 
             return Success();
         }
 
-        public async Task<IServiceActionResult> DeleteUserAsync(int id)
+        public async Task<IServiceActionResult> DeleteReportAsync(int id)
         {
-            var report = await _context.Reports.FindAsync(id);
+            var report = await _reportsRepository.GetReportByIdAsync(id);
 
             if (report == null)
             {
-                return Error("Отчет не существует");
+                return Error("Отчет с идентификатором {Id} не существует", id);
             }
 
-            _context.Reports.Remove(report);
-
-            await _context.SaveChangesAsync();
+            await _reportsRepository.DeleteReportAsync(report);
 
             return Success();
         }
 
-        public async Task<PagingModel<ReportDto>> GetUserReportsAsync(int userId)
+        public async Task<PagingModel<ReportListItemDto>> GetUserReportsAsync(int userId, int page, int pageSize)
         {
-            var reports = _context.Reports.Where(r => r.UserId == userId).AsNoTracking();
-
-            return new PagingModel<ReportDto>
+            if (page < 1)
             {
-                Items = await reports.ProjectTo<ReportDto>(_mapper.ConfigurationProvider).ToListAsync(),
-                Count = await reports.CountAsync()
-            };
+                throw new ArgumentException("Параметр \"page\" должен быть больше нуля");
+            }
+
+            if (pageSize < 1)
+            {
+                throw new ArgumentException("Параметр \"pageSize\" должен быть больше нуля");
+            }
+
+            var reportsResult = await _reportsRepository.GetPaginatedReportsByUserIdAsync(userId, page, pageSize);
+
+            return _mapper.Map<PagingModel<ReportListItemDto>>(reportsResult);
         }
 
-        private IServiceActionResult<TObject> Success<TObject>(TObject obj) => new SuccessObjectResult<TObject>(obj);
-        private IServiceActionResult Success() => new SuccessResult();
-        private IServiceActionResult Error(string errorMessage) => new ErrorResult(errorMessage);
-    }
+        #endregion
 
-    public interface IUserReportsService
-    {
-        Task<IServiceActionResult<ReportDto>> CreateReportAsync(ReportDto reportDto);
-        Task<IServiceActionResult> UpdateReportAsync(int id, ReportDto reportDto);
-        Task<IServiceActionResult> DeleteUserAsync(int id);
-        Task<PagingModel<ReportDto>> GetUserReportsAsync(int userId);
+        public async Task CreateUserAsync(UserListItemDto userDto)
+        {
+            var user = _mapper.Map<User>(userDto);
+
+            await _usersRepository.CreateUserAsync(user);
+
+            _mapper.Map(user, userDto);
+        }
+
+        public async Task UpdateUserAsync(int id, UserListItemDto userDto)
+        {
+            var user = await _usersRepository.GetUserByIdAsync(id);
+
+            if(user == null)
+            {
+
+            }
+
+            _mapper.Map(userDto, user);
+
+            await _usersRepository.UpdateUserAsync(user);
+        }
+
+        public async Task DeleteUserAsync(int id)
+        {
+            var user = await _usersRepository.GetUserByIdAsync(id);
+
+            if(user == null)
+            {
+
+            }
+
+            await _usersRepository.DeleteUserAsync(user);
+        }
+
+        public async Task<PagingModel<UserListItemDto>> GetUsersAsync(int page, int pageSize)
+        {
+            var usersResult = await _usersRepository.GetPaginatedUsersAsync(page, pageSize);
+
+            return _mapper.Map<PagingModel<UserListItemDto>>(usersResult);
+        }
+
+        public async Task<User> GetUserByIdAsync(int id)
+        {
+            return await _usersRepository.GetUserByIdAsync(id);
+        }
     }
 }

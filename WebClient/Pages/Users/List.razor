@@ -2,23 +2,15 @@
 
 @inject IApiHttpClient client
 
-<Div>
-    <Breadcrumb>
-        <BreadcrumbItem>
-            <BreadcrumbLink To="/">Home</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbItem Active="true">
-            <BreadcrumbLink To="/users">Users</BreadcrumbLink>
-        </BreadcrumbItem>
-    </Breadcrumb>
-</Div>
+<Div Padding="Padding.Is3.OnX">
+    <Div Flex="Flex.Row">
+        <Heading Flex="Flex.Shrink.Is1.Grow.Is1" Size="HeadingSize.Is4">Пользователи</Heading>
+        <Button Clicked="_ => usersDataGrid.New()" Color="Color.Primary">
+            <Icon Name="IconName.Add" Style="margin-right: 0.25rem" />
+            <Span>Добавить</Span>
+        </Button>
+    </Div>
 
-<Div>
-    <Heading Size="HeadingSize.Is4">Пользователи</Heading>
-    <Button Clicked="_ => usersDataGrid.New()" Color="Color.Primary"><Icon Name="IconName.Add" />Добавить</Button>
-</Div>
-
-<Div>
     <DataGrid Data="model.Items"
               TotalItems="model.Count"
               TItem="User"
@@ -70,12 +62,16 @@
                               TextChanged="value => context.CellValue = value" />
                 </EditTemplate>
             </DataGridColumn>
-            <DataGridCommandColumn TItem="User" NewCommandAllowed="false" Width="100px">
+            <DataGridCommandColumn TItem="User" NewCommandAllowed="false" Width="110px">
                 <EditCommandTemplate>
-                    <Button Color="Color.Primary" Clicked="@context.Clicked" Margin="Margin.Is0.FromRight"><Icon Name="IconName.Edit" /></Button>
+                    <Button Color="Color.Primary" Outline="true" Clicked="@context.Clicked" Style="margin-right: 0.25rem;">
+                        <Icon Name="IconName.Edit" />
+                    </Button>
                 </EditCommandTemplate>
                 <DeleteCommandTemplate>
-                    <Button Color="Color.Dark" Clicked="@context.Clicked"><Icon Name="IconName.Delete" /></Button>
+                    <Button Color="Color.Danger" Outline="true" Clicked="@context.Clicked">
+                        <Icon Name="IconName.Delete" />
+                    </Button>
                 </DeleteCommandTemplate>
                 <SaveCommandTemplate>
                     <Button Color="Color.Primary" Clicked="@context.Clicked">Сохранить</Button>

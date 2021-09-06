@@ -7,6 +7,7 @@ using Blazorise.Icons.FontAwesome;
 using MapsterMapper;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using WebClient.Routing;
 
 namespace WebClient
 {
@@ -17,6 +18,8 @@ namespace WebClient
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
             builder.RootComponents.Add<App>("#app");
+
+            builder.Services.AddTransient<IRouteMatcher, RouteMatcher>();
 
             var apiServiceUrl = builder.Configuration["ApiUrl"];
 

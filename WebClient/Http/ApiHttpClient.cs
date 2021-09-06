@@ -80,10 +80,11 @@ namespace WebClient
 
         #region Reports
 
-        public async Task<PagingModel<Report>> GetUserReportsAsync(int userId)
+        public async Task<PagingModel<Report>> GetUserReportsAsync(int userId, int page, int pageSize)
         {
-            var requestUrl = ApiEndpoints.Users.AppendPathSegment(userId)
-                .AppendPathSegment("reports");
+            var requestUrl = ApiEndpoints.Reports.AppendPathSegment("users")
+                .AppendPathSegment(userId)
+                .SetQueryParams(new { page, pageSize });
 
             return await _httpClient.GetFromJsonAsync<PagingModel<Report>>(requestUrl);
         }
@@ -150,7 +151,7 @@ namespace WebClient
 
         #region Reports
 
-        Task<PagingModel<Report>> GetUserReportsAsync(int userId);
+        Task<PagingModel<Report>> GetUserReportsAsync(int userId, int page, int pageSize);
         Task<EntityApiActionResult<Report>> InsertReportAsync(Report report);
         Task<bool> UpdateReportAsync(Report report);
         Task<bool> RemoveReportAsync(Report report);

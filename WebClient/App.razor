@@ -1,12 +1,55 @@
-<Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-    </Found>
-    <NotFound>
-        <LayoutView Layout="@typeof(MainLayout)">
-            <p>Sorry, there's nothing at this address.</p>
-        </LayoutView>
-    </NotFound>
-</Router>
-<NotificationAlert />
+<Blazorise.ThemeProvider Theme="@theme">
+    <Router AppAssembly="@typeof(Program).Assembly" PreferExactMatches="@true">
+        <Found Context="routeData">
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        </Found>
+        <NotFound>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <p>Sorry, there's nothing at this address.</p>
+            </LayoutView>
+        </NotFound>
+    </Router>
+    <NotificationAlert />
+</Blazorise.ThemeProvider>
+
+@code
+{
+    private Theme theme = new Theme
+    {
+        TextColorOptions = new ThemeTextColorOptions
+        {
+            Primary = "#656CDA"
+        },
+        ColorOptions = new ThemeColorOptions 
+        { 
+            Primary = "#656cda", 
+            Secondary = "#25d643", 
+            Danger = "#f44040" 
+        },
+        BarOptions = new()
+        {
+            LightColors = new ThemeBarColorOptions
+            {
+                ItemColorOptions = new ThemeBarItemColorOptions
+                {
+                    ActiveBackgroundColor = "#9ba2f6",
+                    ActiveColor = "#ffffff",
+                    HoverBackgroundColor = "#7c86fe",
+                    HoverColor = "#ffffff"
+                }
+            },
+            DarkColors = new ThemeBarColorOptions 
+            {
+                ItemColorOptions = new ThemeBarItemColorOptions 
+                {
+                    ActiveBackgroundColor = "#636efc",
+                    ActiveColor = "#ffffff",
+                    HoverBackgroundColor = "#7c86fe",
+                    HoverColor = "#ffffff"
+                }
+            },
+            HorizontalHeight = "59px"
+        }
+    };
+}
 

@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using UserReportsApp.Api.Data;
 using UserReportsApp.Api.Entities;
 using UserReportsApp.Api.Extensions;
+using UserReportsApp.Api.Repositories;
 using UserReportsApp.Api.Services;
 using UserReportsApp.Shared.Models;
 
@@ -32,18 +33,21 @@ namespace UserReportsApp.Api
 
             services.AddDbContext<UserReportsContext>(options => options.UseSqlServer(defaultConnectionString));
 
+            services.AddTransient<IUsersRepository, UsersRepository>();
+            services.AddTransient<IReportsRepository, ReportsRepository>();
+
             services.AddAutoMapper(ConfigureMapper);
 
             services.AddTransient<IUserReportsService, UserReportsService>();
 
-            services.AddCors(Configuration);
+            services.AddControllers();
 
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "UserReportsApp.Api", Version = "v1" });
             });
 
-            services.AddControllers();
+            services.AddCors(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -77,7 +81,11 @@ namespace UserReportsApp.Api
 
         private static void ConfigureMapper(IMapperConfigurationExpression config)
         {
-            config.CreateMap<Report, ReportDto>().ReverseMap();
+            config.CreateMap<Report, ReportListItemDto>().ReverseMap();
+            config.CreateMap<PagingModel<Report>, PagingModel<ReportListItemDto>>();
+
+            config.CreateMap<User, UserListItemDto>().ReverseMap();
+            config.CreateMap<PagingModel<User>, PagingModel<UserListItemDto>>();
         }
     }
 }

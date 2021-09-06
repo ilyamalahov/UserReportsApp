@@ -50,12 +50,5 @@ namespace UserReportsApp.Api.Extensions
                 }
             });
         }
-
-        //public static void AddAutoMapper(this IServiceCollection services, Action<IMapperConfigurationExpression> configureMapper)
-        //{
-        //    var configuration = new MapperConfiguration(configureMapper);
-
-        //    services.AddScoped(_ => configuration.CreateMapper());
-        //}
     }
 }
