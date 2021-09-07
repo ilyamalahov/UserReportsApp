@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using UserReportsApp.Api.Entities;
 
@@ -13,10 +14,22 @@ namespace UserReportsApp.Api.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Report>()
-                .HasOne(r => r.User)
+            #region Reports
+
+            var reportEntity = modelBuilder.Entity<Report>();
+
+            reportEntity.Property(r => r.Id)
+                .ValueGeneratedOnAdd();
+
+            reportEntity.Property(r => r.CreatedDate)
+                .HasDefaultValue(DateTime.Now)
+                .HasDefaultValueSql("getdate()");
+
+            reportEntity.HasOne(r => r.User)
                 .WithMany(u => u.Reports)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            #endregion
         }
 
         public DbSet<User> Users { get; set; }
