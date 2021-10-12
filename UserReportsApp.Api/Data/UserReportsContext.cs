@@ -22,7 +22,6 @@ namespace UserReportsApp.Api.Data
                 .ValueGeneratedOnAdd();
 
             reportEntity.Property(r => r.CreatedDate)
-                .HasDefaultValue(DateTime.Now)
                 .HasDefaultValueSql("getdate()");
 
             reportEntity.HasOne(r => r.User)
